@@ -41,5 +41,9 @@ public class GradeManager {
         }
 
     }
+
+    public List<Alocacao> getGradeAlocada() {
+    return this.gradeAlocada;
+    }
 }
 
