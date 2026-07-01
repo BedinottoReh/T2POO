@@ -1,29 +1,21 @@
+/*//classe associativa, para unir professor, disciplina e horario */
 package model;
 
-//classe associativa, para unir professor, disciplina e horario
 public class Alocacao {
-    private Professor professor;
-    private Disciplina disciplina;
-    private Horario horario;
+    private final Professor professor;
+    private final Disciplina disciplina;
+    private final Horario horario;
 
-    public Alocacao(Professor professor, Disciplina disciplina, Horario horario) { //construtor para inicializar a alocacao
+    public Alocacao(Professor professor, Disciplina disciplina, Horario horario) {
+        if (professor == null || disciplina == null || horario == null) {
+            throw new IllegalArgumentException("Professor, disciplina e horário não podem ser nulos.");
+        }
         this.professor = professor;
         this.disciplina = disciplina;
         this.horario = horario;
     }
 
-    public Professor getProfessor() { //getters para leitura de dados privados
-        return professor;
-    }
-    public Disciplina getDisciplina() { 
-        return disciplina;
-    }
-    public Horario getHorario() { 
-        return horario;
-    }
-
-    @Override
-    public String toString() { //formatação da impressão da linha da grade
-        return String.format("[%s] %s leciona %s", horario, professor.getNome(), disciplina.getNome());
-    }
+    public Professor getProfessor() {return professor;}
+    public Disciplina getDisciplina() {return disciplina;}
+    public Horario getHorario() {return horario;}
 }
