@@ -1,1 +1,4 @@
 *.class
+professores.json
+disciplina.json
+.DS_Store

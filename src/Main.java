@@ -23,11 +23,6 @@ public class Main {
         Horario horario4 = new Horario(Horario.DiaSemana.TERCA, Horario.Turno.NOITE);
         Horario horario5 = new Horario(Horario.DiaSemana.TERCA, Horario.Turno.NOITE);
         Horario horario6 = new Horario(Horario.DiaSemana.TERCA, Horario.Turno.NOITE);
-        Horario horario7 = new Horario(Horario.DiaSemana.QUARTA, Horario.Turno.NOITE);
-        Horario horario8 = new Horario(Horario.DiaSemana.QUINTA, Horario.Turno.NOITE);
-        Horario horario9 = new Horario(Horario.DiaSemana.QUINTA, Horario.Turno.NOITE);
-        Horario horario10 = new Horario(Horario.DiaSemana.SEXTA, Horario.Turno.NOITE);
-        Horario horario11 = new Horario(Horario.DiaSemana.SEXTA, Horario.Turno.TARDE);
 
         System.out.println("\nTentando alocar aulas...\n");
         gradeManager.tentarAlocar(professores.get(0), disciplinas.get(0), horario1);
@@ -42,8 +37,7 @@ public class Main {
         
         System.out.println("\nTentando alocar aulas com conflitos de horário...\n");
         gradeManager.tentarAlocar(professores.get(0), disciplinas.get(6), horario1); //conflito de horario
-        gradeManager.tentarAlocar(professores.get(1), disciplinas.get(7), horario2); //conflito de horario
-
+        
         gradeManager.imprimirGrade();
     }
     

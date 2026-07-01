@@ -1,26 +1,34 @@
+/*Representa a entidade Professor */
+
 package model;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Professor {
-    private String nome;
-    private List<String> areasConhecimento; //areas de conhecimento do professor
+    private final String nome;
+    private final Set<String> areasConhecimento = new HashSet<>(); //conjunto de áreas de conhecimento do professor
 
-    public Professor(String nome, List<String> areasConhecimento) { //construtor para inicializar o professor
+    public Professor(String nome, List<String> areasInciais){
+        if (nome == null || nome.trim().isEmpty()){
+            throw new IllegalArgumentException("Nome do professor não pode ser nulo ou vazio.");
+        }
         this.nome = nome;
-        this.areasConhecimento = areasConhecimento;
+        if (areasInciais != null) {
+            this.areasConhecimento.addAll(areasInciais);
+        }
     }
 
-    public String getNome() { //get para leitura de dados privados
+    public String getNome() {
         return nome;
     }
 
-    public boolean possuiAreaConhecimento(String area) { //verifica se o professor possui a area de conhecimento
-        return areasConhecimento.contains(area);
+    public Set<String> getAreasConhecimento() {
+        return Collections.unmodifiableSet(areasConhecimento); // Retorna uma cópia para evitar modificação externa
     }
 
     @Override
-    public String toString() { //toString para representar o objeto como uma string
-        return nome;
-    }
+    public String toString(){ return nome;}
 }
