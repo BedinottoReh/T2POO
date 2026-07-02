@@ -3,10 +3,15 @@ package service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import java.util.stream.Collectors;
 import model.Alocacao;
 import model.Disciplina;
 import model.Horario;
 import model.Professor;
+import strategy.RegraValidacao;
+import strategy.ValidadorChoqueHorario;
+import strategy.ValidadorCompetencia;
 
 public class GradeManager {
 
@@ -28,6 +33,30 @@ public class GradeManager {
         }
     }
 
+    private final List<RegraValidacao> regras;
+
+
+    public GradeManager() {
+        this.gradeAlocada = new ArrayList<>(); //inicializa a lista de alocações
+        this.regras = new ArrayList<>();
+        this.regras.add(new ValidadorChoqueHorario());
+        this.regras.add(new ValidadorCompetencia());
+    }
+
+    public void tentarAlocar(Professor professor, Disciplina disciplina, Horario horario) {
+
+    for (RegraValidacao regra : regras) { //executa cada regra de validação
+        regra.validar(professor, disciplina, horario, this);
+    }
+
+    Alocacao novaAlocacao =
+            new Alocacao(professor, disciplina, horario);
+
+    this.gradeAlocada.add(novaAlocacao);
+
+    System.out.println("Alocação concluída para " + professor.getNome() + " -> " + disciplina.getNome());
+}
+
     public void imprimirGrade(){
         System.out.println("GRADE HORÁRIO ATUAL");
         if(gradeAlocada.isEmpty()){
@@ -47,3 +76,13 @@ public class GradeManager {
     }
 }
 
+        return this.gradeAlocada;
+    }
+    
+    public List<Alocacao> buscarAlocacoesProfessor(Professor professor) {
+        return gradeAlocada.stream()
+                .filter(alocacao ->
+                        alocacao.getProfessor().equals(professor))
+                .collect(Collectors.toList());
+    }
+}
