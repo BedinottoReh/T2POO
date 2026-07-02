@@ -1,0 +1,38 @@
+[
+  {
+    "codigo": "Al0013",
+    "nome": "Circuitos Digitais",
+    "area": "Fundamentos da Computação",
+    "cargaHoraria": 60
+  },
+  {
+    "codigo": "AL0494",
+    "nome": "Introdução a Computação",
+    "area": "Fundamentos da Computação",
+    "cargaHoraria": 60
+  },
+  {
+    "codigo": "Al0324",
+    "nome": "Lógica Matemática",
+    "area": "Matemática",
+    "cargaHoraria": 60
+  },
+  {
+    "codigo": "Al0500",
+    "nome": "Banco de Dados",
+    "area": "Tecnologias da Computação",
+    "cargaHoraria": 60
+  },
+  {
+    "codigo": "Al0493",
+    "nome": "ALGORITMOS E PROGRAMAÇÃO PARA COMPUTAÇÃO",
+    "area": "Fundamentos da Computação",
+    "cargaHoraria": 90
+  },
+  {
+    "codigo": "AL0495",
+    "nome": "Fundamentos da Matemática",
+    "area": "Matemática",
+    "cargaHoraria": 60
+  }
+]

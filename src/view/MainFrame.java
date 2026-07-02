@@ -28,11 +28,15 @@ public class MainFrame extends JFrame {
     private DefaultListModel<String> modelListaProfessores;
     private DefaultListModel<String> modelListaDisciplinas;
 
-    // Correção: Unificando o nome das variáveis para comboBoxProfessores e comboBoxDisciplinas
     private JComboBox<Professor> comboBoxProfessores;
     private JComboBox<Disciplina> comboBoxDisciplinas;
     private JComboBox<Horario.DiaSemana> comboDias;
     private JComboBox<Horario.Turno> comboTurnos;
+    private JComboBox<Horario.Bloco> comboBlocos;
+
+    // Variáveis de controle para saber se estamos editando
+    private Professor professorSendoEditado = null;
+    private Disciplina disciplinaSendoEditada = null;
 
     private CardLayout cardLayout;
     private JPanel painelCentral;
@@ -50,7 +54,6 @@ public class MainFrame extends JFrame {
             System.err.println("Não foi possível carregar o tema.");
         }
 
-        // Inicializar os dados
         this.repositorio = new Repositorio();
         this.gradeManager = new GradeManager();
         this.listaProfessores = repositorio.carregarProfessores();
@@ -61,17 +64,14 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Layout principal
         JPanel painelPrincipal = new JPanel(new BorderLayout());
 
-        // Menu lateral
         JPanel menuLateral = new JPanel();
         menuLateral.setBackground(ROXO_PRINCIPAL);
         menuLateral.setPreferredSize(new Dimension(230, 700));
         menuLateral.setLayout(new BoxLayout(menuLateral, BoxLayout.Y_AXIS));
         menuLateral.setBorder(new EmptyBorder(30, 15, 30, 15));
 
-        // Título Menu
         JLabel lblLogo = new JLabel("Portal Grade Acadêmica");
         lblLogo.setFont(new Font("Segoe UI", Font.BOLD, 20));
         lblLogo.setForeground(Color.WHITE);
@@ -79,7 +79,6 @@ public class MainFrame extends JFrame {
         menuLateral.add(lblLogo);
         menuLateral.add(Box.createRigidArea(new Dimension(0, 40)));
 
-        // Botões do menu
         JButton btnMenuGeral = criarBotaoMenu("Painel Geral");
         JButton btnMenuProfessores = criarBotaoMenu("Cadastrar Professores");
         JButton btnMenuDisciplinas = criarBotaoMenu("Cadastrar Disciplinas");
@@ -95,7 +94,6 @@ public class MainFrame extends JFrame {
 
         painelPrincipal.add(menuLateral, BorderLayout.WEST);
 
-        // Painel central
         cardLayout = new CardLayout();
         painelCentral = new JPanel(cardLayout);
         painelCentral.setBackground(Color.WHITE);
@@ -108,7 +106,6 @@ public class MainFrame extends JFrame {
         painelPrincipal.add(painelCentral, BorderLayout.CENTER);
         add(painelPrincipal);
 
-        // Eventos do menu
         btnMenuGeral.addActionListener(e -> cardLayout.show(painelCentral, "Geral"));
         btnMenuProfessores.addActionListener(e -> cardLayout.show(painelCentral, "Professor"));
         btnMenuDisciplinas.addActionListener(e -> cardLayout.show(painelCentral, "Disciplina"));
@@ -130,7 +127,6 @@ public class MainFrame extends JFrame {
         return btn;
     }
 
-    // Painel geral
     private JPanel criarAbaGeral() {
         JPanel painel = new JPanel(new BorderLayout(20, 20));
         painel.setBackground(Color.WHITE);
@@ -147,7 +143,6 @@ public class MainFrame extends JFrame {
             public boolean isCellEditable(int row, int column) { return false; }
         };
 
-        // Linhas de horários
         modeloTabela.addRow(new Object[]{"08:30 - 10:20", "", "", "", "", ""});
         modeloTabela.addRow(new Object[]{"10:30 - 12:20", "", "", "", "", ""});
         modeloTabela.addRow(new Object[]{"13:30 - 15:20", "", "", "", "", ""});
@@ -199,7 +194,7 @@ public class MainFrame extends JFrame {
         
         for (Alocacao aloc : alocacoesAtuais) {
             int colunaDia = obterColunaPorDia(aloc.getHorario().getDiaSemana());
-            int linhaTurno = obterLinhaPorTurno(aloc.getHorario().getTurno());
+            int linhaTurno = obterLinhaPorTurno(aloc.getHorario().getTurno(), aloc.getHorario().getBloco());
             
             if (colunaDia != -1 && linhaTurno != -1) {
                 String conteudo = "<html><center><b>" + aloc.getDisciplina().getNome() + "</b><br><font color='#7B3FFE'>" + aloc.getProfessor().getNome() + "</font></center></html>";
@@ -219,11 +214,14 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private int obterLinhaPorTurno(Horario.Turno turno) {
+    private int obterLinhaPorTurno(Horario.Turno turno, Horario.Bloco bloco) {
         switch (turno) {
-            case MANHA: return 0; 
-            case TARDE: return 2;
-            case NOITE: return 4;
+            case MANHA: 
+                return (bloco == Horario.Bloco.PRIMEIRO) ? 0 : 1; 
+            case TARDE: 
+                return (bloco == Horario.Bloco.PRIMEIRO) ? 2 : 3;
+            case NOITE: 
+                return (bloco == Horario.Bloco.PRIMEIRO) ? 4 : 5;
             default: return -1;
         }
     }
@@ -239,7 +237,7 @@ public class MainFrame extends JFrame {
         form.add(new JLabel("Nome do Professor:"));
         JTextField txtNome = new JTextField();
         form.add(txtNome);
-        form.add(new JLabel("Área de Atuação:"));
+        form.add(new JLabel("Área de Atuação (separadas por vírgula):"));
         JTextField txtArea = new JTextField();
         form.add(txtArea);
         painel.add(form, BorderLayout.NORTH);
@@ -249,25 +247,61 @@ public class MainFrame extends JFrame {
         listaVisual.setSelectionBackground(ROXO_CLARO);
         painel.add(new JScrollPane(listaVisual), BorderLayout.CENTER);
 
+        // Painel inferior para abrigar os botões de Salvar e Editar
+        JPanel painelAcoes = new JPanel(new GridLayout(1, 2, 10, 0));
+        painelAcoes.setBackground(Color.WHITE);
+        painelAcoes.setPreferredSize(new Dimension(0, 45));
+
+        JButton btnEditar = new JButton("✏️ Editar Selecionado");
+        btnEditar.setBackground(new Color(240, 240, 240));
+        btnEditar.setForeground(Color.BLACK);
+
         JButton btnSalvar = new JButton("Salvar Professor");
         btnSalvar.setBackground(ROXO_PRINCIPAL);
         btnSalvar.setForeground(Color.WHITE);
-        btnSalvar.setPreferredSize(new Dimension(0, 45));
-        painel.add(btnSalvar, BorderLayout.SOUTH);
 
+        painelAcoes.add(btnEditar);
+        painelAcoes.add(btnSalvar);
+        painel.add(painelAcoes, BorderLayout.SOUTH);
+
+        // Evento do botão Editar
+        btnEditar.addActionListener(e -> {
+            int index = listaVisual.getSelectedIndex();
+            if (index != -1) {
+                professorSendoEditado = listaProfessores.get(index);
+                txtNome.setText(professorSendoEditado.getNome());
+                txtArea.setText(String.join(",", professorSendoEditado.getAreasConhecimento()));
+                btnSalvar.setText("💾 Confirmar Alterações");
+            } else {
+                JOptionPane.showMessageDialog(this, "Selecione um professor na lista para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        // Evento do botão Salvar (Modificado para suportar Update)
         btnSalvar.addActionListener(e -> {
             try {
                 String nome = txtNome.getText();
                 String area = txtArea.getText();
+                
                 Professor novoProf = new Professor(nome, Arrays.asList(area.split(",")));
                 
-                listaProfessores.add(novoProf);
+                if (professorSendoEditado != null) {
+                    // Substitui o professor antigo na lista pelo novo editado
+                    int index = listaProfessores.indexOf(professorSendoEditado);
+                    listaProfessores.set(index, novoProf);
+                    professorSendoEditado = null; // Limpa o estado de edição
+                    btnSalvar.setText("Salvar Professor");
+                    JOptionPane.showMessageDialog(this, "Professor atualizado com sucesso!");
+                } else {
+                    listaProfessores.add(novoProf);
+                    JOptionPane.showMessageDialog(this, "Professor cadastrado com sucesso!");
+                }
+                
                 repositorio.alvarProfessores(listaProfessores);
                 atualizarListasInterface();
                 
                 txtNome.setText("");
                 txtArea.setText("");
-                JOptionPane.showMessageDialog(this, "Professor cadastrado com sucesso!");
             } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
             }
@@ -303,12 +337,39 @@ public class MainFrame extends JFrame {
         listaVisual.setSelectionBackground(ROXO_CLARO);
         painel.add(new JScrollPane(listaVisual), BorderLayout.CENTER);
 
+        // Painel inferior de ações para Disciplinas
+        JPanel painelAcoes = new JPanel(new GridLayout(1, 2, 10, 0));
+        painelAcoes.setBackground(Color.WHITE);
+        painelAcoes.setPreferredSize(new Dimension(0, 45));
+
+        JButton btnEditar = new JButton("Editar Selecionada");
+        btnEditar.setBackground(new Color(240, 240, 240));
+        btnEditar.setForeground(Color.BLACK);
+
         JButton btnSalvar = new JButton("Salvar Disciplina");
         btnSalvar.setBackground(ROXO_PRINCIPAL);
         btnSalvar.setForeground(Color.WHITE);
-        btnSalvar.setPreferredSize(new Dimension(0, 45));
-        painel.add(btnSalvar, BorderLayout.SOUTH);
 
+        painelAcoes.add(btnEditar);
+        painelAcoes.add(btnSalvar);
+        painel.add(painelAcoes, BorderLayout.SOUTH);
+
+        // Evento do botão Editar Disciplina
+        btnEditar.addActionListener(e -> {
+            int index = listaVisual.getSelectedIndex();
+            if (index != -1) {
+                disciplinaSendoEditada = listaDisciplinas.get(index);
+                txtCodigo.setText(disciplinaSendoEditada.getCodigo());
+                txtNome.setText(disciplinaSendoEditada.getNome());
+                txtArea.setText(disciplinaSendoEditada.getArea());
+                txtCarga.setText(String.valueOf(disciplinaSendoEditada.getCargaHoraria()));
+                btnSalvar.setText("Confirmar Alterações");
+            } else {
+                JOptionPane.showMessageDialog(this, "Selecione uma disciplina na lista para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        // Evento do botão Salvar Disciplina (Modificado para suportar Update)
         btnSalvar.addActionListener(e -> {
             try {
                 String codigo = txtCodigo.getText();
@@ -317,7 +378,18 @@ public class MainFrame extends JFrame {
                 int carga = Integer.parseInt(txtCarga.getText().trim());
 
                 Disciplina novaDisc = new Disciplina(codigo, nome, area, carga);
-                listaDisciplinas.add(novaDisc);
+                
+                if (disciplinaSendoEditada != null) {
+                    int index = listaDisciplinas.indexOf(disciplinaSendoEditada);
+                    listaDisciplinas.set(index, novaDisc);
+                    disciplinaSendoEditada = null; // Limpa o estado de edição
+                    btnSalvar.setText("Salvar Disciplina");
+                    JOptionPane.showMessageDialog(this, "Disciplina atualizada com sucesso!");
+                } else {
+                    listaDisciplinas.add(novaDisc);
+                    JOptionPane.showMessageDialog(this, "Disciplina cadastrada com sucesso");
+                }
+                
                 repositorio.salvarDisciplinas(listaDisciplinas);
                 atualizarListasInterface();
                 
@@ -325,7 +397,6 @@ public class MainFrame extends JFrame {
                 txtNome.setText("");
                 txtArea.setText("");
                 txtCarga.setText("");
-                JOptionPane.showMessageDialog(this, "Disciplina cadastrada com sucesso");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Erro nos dados informados.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
@@ -334,11 +405,10 @@ public class MainFrame extends JFrame {
         return painel;
     }
 
-    // --- ABA 4: MATCH ---
     private JPanel criarAbaMatch() {
-        JPanel painel = new JPanel(new GridLayout(9, 1, 8, 8));
+        JPanel painel = new JPanel(new GridLayout(11, 1, 6, 6)); 
         painel.setBackground(Color.WHITE);
-        painel.setBorder(new EmptyBorder(40, 60, 40, 60));
+        painel.setBorder(new EmptyBorder(30, 60, 30, 60));
 
         painel.add(new JLabel("<b>Selecione o Professor:</b>"));
         comboBoxProfessores = new JComboBox<>(); 
@@ -356,6 +426,10 @@ public class MainFrame extends JFrame {
         comboTurnos = new JComboBox<>(Horario.Turno.values());
         painel.add(comboTurnos);
 
+        painel.add(new JLabel("<b>Selecione o Horário do Turno:</b>"));
+        comboBlocos = new JComboBox<>(Horario.Bloco.values());
+        painel.add(comboBlocos);
+
         JButton btnAlocar = new JButton("🤝 Confirmar Match e Alocação");
         btnAlocar.setBackground(ROXO_PRINCIPAL);
         btnAlocar.setForeground(Color.WHITE);
@@ -367,12 +441,16 @@ public class MainFrame extends JFrame {
             Disciplina d = (Disciplina) comboBoxDisciplinas.getSelectedItem(); 
             Horario.DiaSemana dia = (Horario.DiaSemana) comboDias.getSelectedItem();
             Horario.Turno turno = (Horario.Turno) comboTurnos.getSelectedItem();
+            Horario.Bloco bloco = (Horario.Bloco) comboBlocos.getSelectedItem();
 
             if (p != null && d != null) {
-                Horario h = new Horario(dia, turno);
-                gradeManager.tentarAlocar(p, d, h); 
-                
-                JOptionPane.showMessageDialog(this, "Match registrado! Vá ao Painel Geral e clique em Atualizar.");
+                try {
+                    Horario h = new Horario(dia, turno, bloco);
+                    gradeManager.tentarAlocar(p, d, h); 
+                    JOptionPane.showMessageDialog(this, "🤝 Match registrado com sucesso!\nVá ao Painel Geral e clique em Atualizar.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                } catch (RuntimeException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Alerta de Validação", JOptionPane.WARNING_MESSAGE);
+                }
             }
         });
 

@@ -9,16 +9,19 @@ public final class Horario { //final para que ela não possa ter classes filhas
     public enum Turno {
         MANHA, TARDE, NOITE
     }
+    public enum Bloco { PRIMEIRO, SEGUNDO }
 
     private final DiaSemana diaSemana;
     private final Turno turno;
+    private Bloco bloco;
 
-    public Horario(DiaSemana diaSemana, Turno turno) {
-        if (diaSemana == null || turno == null) {
-            throw new IllegalArgumentException("Dia da semana e turno não podem ser nulos.");
+    public Horario(DiaSemana diaSemana, Turno turno, Bloco bloco) {
+        if (diaSemana == null || turno == null || bloco == null) {
+            throw new IllegalArgumentException("Dia da semana, turno e bloco não podem ser nulos.");
         }
         this.diaSemana = diaSemana;
         this.turno = turno;
+        this.bloco = bloco;
     }
 
     public DiaSemana getDiaSemana() { //get para leitura de dados privados
@@ -26,6 +29,9 @@ public final class Horario { //final para que ela não possa ter classes filhas
     }
     public Turno getTurno() {
         return turno;
+    }
+    public Bloco getBloco() {
+        return bloco;
     }
 
     @Override
@@ -42,7 +48,8 @@ public final class Horario { //final para que ela não possa ter classes filhas
     }
 
     @Override
-    public String toString() { //toString para representar o horario como uma string
-        return diaSemana + " - " + turno;
+    public String toString() {
+        String num = (bloco == Bloco.PRIMEIRO) ? "1º Horário" : "2º Horário";
+        return diaSemana + " - " + turno + " (" + num + ")";
     }
 }
