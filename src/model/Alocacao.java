@@ -1,7 +1,8 @@
-/*//classe associativa, para unir professor, disciplina e horario */
+//classe associativa, para unir professor, disciplina e horario 
 package model;
 
 public class Alocacao {
+    //encapsulamento e imutabilidade
     private final Professor professor;
     private final Disciplina disciplina;
     private final Horario horario;
