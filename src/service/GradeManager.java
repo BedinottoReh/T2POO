@@ -3,6 +3,7 @@ package service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.stream.Collectors;
 import model.Alocacao;
 import model.Disciplina;
@@ -15,6 +16,22 @@ import strategy.ValidadorCompetencia;
 public class GradeManager {
 
     private List<Alocacao> gradeAlocada;
+
+
+    public GradeManager() {
+        this.gradeAlocada = new ArrayList<>(); //inicializa a lista de alocações
+    }
+
+    public void tentarAlocar(Professor professor, Disciplina disciplina, Horario horario) {
+        try {
+            Alocacao novaAlocacao = new Alocacao(professor, disciplina, horario);
+            this.gradeAlocada.add(novaAlocacao);
+            System.out.println("Alocação concluida para "+ professor.getNome() + "->" + disciplina.getNome());
+
+        } catch (IllegalArgumentException e){
+            System.err.println("Erro ao alocar: " + e.getMessage());
+        }
+    }
 
     private final List<RegraValidacao> regras;
 
@@ -55,6 +72,10 @@ public class GradeManager {
     }
 
     public List<Alocacao> getGradeAlocada() {
+    return this.gradeAlocada;
+    }
+}
+
         return this.gradeAlocada;
     }
     
