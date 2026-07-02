@@ -33,6 +33,7 @@ src/
 ├── view/
 │   └── MainFrame.java
 └── Main.java
+```
 
 ## Arquitetura do Sistema
 Camada de Modelo ('model')
