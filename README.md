@@ -60,3 +60,16 @@ MainFrame: Gerencia a navegação por painéis em camadas (*CardLayout*), render
 ## Contribuições 
 - Renata Bedinotto: Desenvolvimento do front-end, renderização dinâmica de tabelas, tratamento defensivo de erros na interface e rotinas do CRUD de edição de cadastros.
 - Sarah Severo: Modelagem do motor de negócios, configuração da persistência de arquivos JSON via Gson e arquitetura polimórfica do padrão Strategy para as regras de validação.
+
+##Como executar o projeto
+Como o projeto utiliza bibliotecas externas (`.jar`) para o design e persistência de dados, siga os comandos abaixo no terminal para compilar e rodar o sistema corretamente.
+
+### Pré-requisitos
+* Possuir o **Java JDK** instalado na máquina (versão 17 ou superior).
+
+### Passo a Passo
+
+1. Abra o terminal na pasta raiz do projeto (`T2POO`).
+2. Execute o comando abaixo para **compilar** todos os pacotes do sistema:
+   ```bash
+   javac -cp "lib/gson-2.10.1.jar:lib/flatlaf-3.5.1.jar" $(find src -name "*.java")
