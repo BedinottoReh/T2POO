@@ -73,3 +73,7 @@ Como o projeto utiliza bibliotecas externas (`.jar`) para o design e persistênc
 2. Execute o comando abaixo para **compilar** todos os pacotes do sistema:
    ```bash
    javac -cp "lib/gson-2.10.1.jar:lib/flatlaf-3.5.1.jar" $(find src -name "*.java")
+
+Com o projeto compilado, execute o comando abaixo para iniciar a interface gráfica:
+   ```bash
+   java -cp "lib/gson-2.10.1.jar:lib/flatlaf-3.5.1.jar:src" Main
